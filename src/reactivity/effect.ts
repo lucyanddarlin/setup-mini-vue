@@ -1,5 +1,7 @@
 import { extend } from "../shared"
 
+let activeEffect
+let targetsMap = new Map()
 class ReactiveEffect {
   private _fn: any
   deps = []
@@ -19,6 +21,7 @@ class ReactiveEffect {
     if (this.onStop) this.onStop()
   }
 }
+
 function cleanupEffect(effect) {
   if (effect.active) {
     effect.deps.forEach((dep: any) => {
@@ -28,8 +31,6 @@ function cleanupEffect(effect) {
   }
 }
 
-let activeEffect
-let targetsMap = new Map()
 export function track(target, key) {
   // 将要收集的函数存进一个容器里 dep
   // target -> key -> dep
