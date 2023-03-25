@@ -1,3 +1,3 @@
-export const add = (a, b) => {
+export const add = (a: object, b) => {
   return a + b
 }
