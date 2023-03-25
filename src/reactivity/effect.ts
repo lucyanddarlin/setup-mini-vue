@@ -1,6 +1,7 @@
 import { extend } from "../shared"
 
 let activeEffect
+let shouldTrack
 let targetsMap = new Map()
 class ReactiveEffect {
   private _fn: any
@@ -13,8 +14,14 @@ class ReactiveEffect {
     this.scheduler = scheduler
   }
   run() {
+    if (!this.active) {
+      return this._fn()
+    }
+    shouldTrack = true
     activeEffect = this
-    return this._fn()
+    const result = this._fn()
+    shouldTrack = false
+    return result
   }
   stop() {
     cleanupEffect(this)
@@ -27,6 +34,7 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: any) => {
       dep.delete(effect)
     });
+    effect.deps.length = 0
     effect.active = false
   }
 }
@@ -45,6 +53,7 @@ export function track(target, key) {
     depsMap.set(key, dep)
   }
   if (!activeEffect) return
+  if (!shouldTrack) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
 }
