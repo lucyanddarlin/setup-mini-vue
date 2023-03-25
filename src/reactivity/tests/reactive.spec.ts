@@ -9,4 +9,14 @@ describe('reactive', () => {
     expect(isReactive(original)).toBe(false)
   });
 
+  test('nests reactive and readonly', () => {
+    const original = {
+      user: { age: 18 },
+      arr: [{ name: 'lucy' }]
+    }
+    const observed = reactive(original)
+    expect(isReactive(observed.user)).toBe(true)
+    expect(isReactive(observed.arr[0])).toBe(true)
+  });
+
 });

@@ -40,6 +40,7 @@ function cleanupEffect(effect) {
 }
 
 export function track(target, key) {
+  if (!isTracking()) return
   // 将要收集的函数存进一个容器里 dep
   // target -> key -> dep
   let depsMap = targetsMap.get(target)
@@ -52,10 +53,13 @@ export function track(target, key) {
     dep = new Set()
     depsMap.set(key, dep)
   }
-  if (!activeEffect) return
-  if (!shouldTrack) return
+  if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
+}
+
+function isTracking() {
+  return shouldTrack && activeEffect !== undefined
 }
 
 export function trigger(target, key) {
