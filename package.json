@@ -1,7 +1,8 @@
 {
   "name": "setup-mini-vue3",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/setup-mini-vue.cjs.js",
+  "module": "lib/setup-mini-vue.esm.js",
   "license": "MIT",
   "scripts": {
     "test": "jest",
