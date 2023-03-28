@@ -1,2 +1,5 @@
+import { createApp } from '../../lib/setup-mini-vue.esm.js'
+import { App } from '../../example/helloworld/App.js'
 
-createApp(App).mount('#app')
+const rootContainer = document.querySelector('#app')
+createApp(App).mount(rootContainer)
