@@ -22,6 +22,7 @@ function setupStatefulComponent(instance: any) {
     const setupResult = setup()
     handleSetupResult(instance, setupResult)
   }
+  finishComponentSetup(instance)
 }
 
 function handleSetupResult(instance, setupResult: any) {
@@ -29,7 +30,6 @@ function handleSetupResult(instance, setupResult: any) {
   if (typeof setupResult === 'object') {
     instance.setupState = setupResult
   }
-  finishComponentSetup(instance)
 }
 
 function finishComponentSetup(instance: any) {

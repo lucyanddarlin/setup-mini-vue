@@ -9,8 +9,6 @@ function patch(vnode, container) {
   processComponent(vnode, container)
 }
 
-
-
 function processComponent(vnode, container) {
   mountComponent(vnode, container)
 }
