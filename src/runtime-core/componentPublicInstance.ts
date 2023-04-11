@@ -4,9 +4,13 @@ const publicPropertiesMap = {
 
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
-    const { setupState, vnode } = instance
-    if (key in setupState) {
+    const { setupState, props } = instance
+    const isOwn = (val, key) => Object.prototype.hasOwnProperty.call(val, key)
+    console.log(key);
+    if (isOwn(setupState, key)) {
       return setupState[key]
+    } else if (isOwn(props, key)) {
+      return props[key]
     }
     const publicGetter = publicPropertiesMap[key]
     if (publicGetter) {
