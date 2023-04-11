@@ -1,3 +1,4 @@
+import { isObject } from "../shared"
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance"
 
 export function createComponentInstance(vnode) {
@@ -14,7 +15,6 @@ export function setupComponent(instance: any) {
   // initProps
   // initSlots
   setupStatefulComponent(instance)
-
 }
 
 function setupStatefulComponent(instance: any) {
@@ -30,7 +30,7 @@ function setupStatefulComponent(instance: any) {
 
 function handleSetupResult(instance, setupResult: any) {
   // TODO: function
-  if (typeof setupResult === 'object') {
+  if (isObject(setupResult)) {
     instance.setupState = setupResult
   }
 }

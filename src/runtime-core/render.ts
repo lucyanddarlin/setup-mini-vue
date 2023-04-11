@@ -1,4 +1,3 @@
-import { isObject } from "../shared";
 import { shapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
 
@@ -31,9 +30,15 @@ function mountElement(vnode: any, container: any) {
     mountChildren(children, el)
   }
   for (const key in props) {
+    console.log(key);
     const val = props[key]
+    const isOn = (key: string) => /^on[A-Z]/.test(key)
     if (val) {
-      el.setAttribute(key, val)
+      if (isOn(key)) {
+        el.addEventListener('click', val)
+      } else {
+        el.setAttribute(key, val)
+      }
     }
   }
   container.append(el)
@@ -60,6 +65,7 @@ function setupRenderEffect(instance: any, initialVnode, container) {
   const subTree = instance.render.call(proxy)
   // vnode -> element -> mountElement
   patch(subTree, container)
+  // handle $el
   initialVnode.el = subTree.el
 }
 
