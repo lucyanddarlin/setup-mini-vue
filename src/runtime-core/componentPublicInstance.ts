@@ -1,3 +1,5 @@
+import { isOwn } from "../shared";
+
 const publicPropertiesMap = {
   $el: (i) => i.vnode.el
 }
@@ -5,7 +7,6 @@ const publicPropertiesMap = {
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
     const { setupState, props } = instance
-    const isOwn = (val, key) => Object.prototype.hasOwnProperty.call(val, key)
     console.log(key);
     if (isOwn(setupState, key)) {
       return setupState[key]
