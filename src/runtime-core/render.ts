@@ -30,7 +30,6 @@ function mountElement(vnode: any, container: any) {
     mountChildren(children, el)
   }
   for (const key in props) {
-    console.log(key);
     const val = props[key]
     const isOn = (key: string) => /^on[A-Z]/.test(key)
     if (val) {

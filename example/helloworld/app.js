@@ -10,12 +10,21 @@ export const App = {
         'id': 'root',
         'class': ['red', 'blue'],
         onClick: () => {
-          console.log('click');
+          const a = 1
         }
       },
-      [h('div', {}, 'hi,' + this.msg), h(Foo, { count: 1 })]
-      // [h('p', { 'class': 'red' }, 'p1'), h('p', { 'class': 'red' }, 'p2')]
-      // 'hi, ' + this.msg
+      [
+        h('div', {}, 'hi,' + this.msg),
+        h(Foo, {
+          count: 1,
+          onAdd: (a, b) => {
+            console.log('add', a, b);
+          },
+          onAddFoo: () => {
+            console.log('onAddFoo')
+          }
+        })
+      ]
     )
   },
   setup () {
