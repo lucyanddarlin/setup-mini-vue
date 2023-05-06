@@ -2,7 +2,7 @@ import { shapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
 import { Fragment, Text } from "./vnode";
 
-export function render(vnode, container, parentComponent) {
+export function render(vnode, container, parentComponent = null) {
   patch(vnode, container, parentComponent)
 }
 
