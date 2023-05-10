@@ -1,6 +1,7 @@
 import { h, renderSlots } from '../../lib/setup-mini-vue.esm.js'
 
 export const Foo = {
+  name: 'Foo',
   render () {
     const foo = h('p', {}, 'Foo')
     const age = 19
