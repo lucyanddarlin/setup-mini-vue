@@ -7,7 +7,13 @@ import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
 
-  const { createElement: hostCreateElement, patchProps: hostPatchProps, insert: hostInsert } = options
+  const {
+    createElement: hostCreateElement,
+    patchProps: hostPatchProps,
+    insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText
+  } = options
 
   function render(vnode, container, parentComponent = null) {
     patch(null, vnode, container, parentComponent)
@@ -51,22 +57,52 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n2, container, parentComponent)
     } else {
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parentComponent)
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     console.log('patchElement');
     console.log('n1', n1);
     console.log('n2', n2);
-    patchProps(n1, n2, container)
-  }
-
-  function patchProps(n1, n2, container) {
     const newProps = n2.props || EMPTY_OBJ
     const oldProps = n1.props || EMPTY_OBJ
+    const el = n2.el = n1.el
+    patchChildren(n1, n2, el, parentComponent)
+    patchProps(newProps, oldProps, el)
+  }
+
+  function patchChildren(n1, n2, container, parentComponent) {
+    const prevShapeFlag = n1.shapeFlag
+    const c1 = n1.children
+    const { shapeFlag } = n2
+    const c2 = n2.children
+    if (shapeFlag & shapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & shapeFlags.ARRAY_CHILDREN) {
+        // 1. 清空 children
+        unMountChildren(n1.children)
+      }
+      if (c1 !== c2) {
+        hostSetElementText(c2, container)
+      }
+    } else {
+      // new -> array
+      if (prevShapeFlag & shapeFlags.TEXT_CHILDREN) {
+        hostSetElementText('', container)
+        mountChildren(c2, container, parentComponent)
+      }
+    }
+  }
+
+  function unMountChildren(children) {
+    for (let index = 0; index < children.length; index++) {
+      const el = children[index].el
+      hostRemove(el)
+    }
+  }
+
+  function patchProps(oldProps, newProps, el) {
     if (oldProps !== newProps) {
-      const el = n2.el = n1.el
       for (const key in newProps) {
         const prevProps = oldProps[key]
         const nextProps = newProps[key]
@@ -74,7 +110,6 @@ export function createRenderer(options) {
           hostPatchProps(el, key, prevProps, nextProps)
         }
       }
-
       if (oldProps !== EMPTY_OBJ) {
         for (const key in oldProps) {
           if (!(key in newProps)) {

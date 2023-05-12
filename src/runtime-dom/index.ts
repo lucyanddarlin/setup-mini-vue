@@ -10,7 +10,6 @@ function patchProps(el, key, pervVal, nextVal) {
     el.addEventListener(key.toLowerCase().slice(2), nextVal)
   } else {
     if (nextVal === undefined || nextVal === null) {
-      console.log('remove');
       el.removeAttribute(key)
     } else {
       el.setAttribute(key, nextVal)
@@ -22,10 +21,22 @@ function insert(el, container) {
   container.append(el)
 }
 
+function remove(children) {
+  const parent = children.parentNode
+  parent.removeChild(children)
+
+}
+
+function setElementText(text, el) {
+  el.textContent = text
+}
+
 const renderer: any = createRenderer({
   createElement,
   patchProps,
-  insert
+  insert,
+  remove,
+  setElementText
 })
 
 export function createApp(...args) {
