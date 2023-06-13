@@ -3,6 +3,7 @@ import { EMPTY_OBJ } from "../shared";
 import { shapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
 import { createAppApi } from "./createApp";
+import { shouldUpdateComponent } from "./helper/componentUpdateUtils";
 import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
@@ -269,17 +270,32 @@ export function createRenderer(options) {
   }
 
   function processComponent(n1, n2, container, parentComponent, anchor) {
-    mountComponent(n2, container, parentComponent, anchor)
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor)
+    } else {
+      updateComponent(n1, n2)
+    }
   }
 
   function mountComponent(initialVnode: any, container, parentComponent, anchor) {
-    const instance = createComponentInstance(initialVnode, parentComponent)
+    const instance = initialVnode.component = createComponentInstance(initialVnode, parentComponent)
     setupComponent(instance)
     setupRenderEffect(instance, initialVnode, container, anchor)
   }
 
+  function updateComponent(n1, n2) {
+    let instance = n2.component = n1.component
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    } else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
+  }
+
   function setupRenderEffect(instance: any, initialVnode, container, anchor) {
-    effect(() => {
+    instance.update = effect(() => {
       const { isMounted } = instance
       if (!isMounted) {
         const { proxy } = instance
@@ -290,6 +306,12 @@ export function createRenderer(options) {
         initialVnode.el = subTree.el
         instance.isMounted = true
       } else {
+        const { next: nextVnode, vnode: prevVnode } = instance
+        if (nextVnode) {
+          nextVnode.el = prevVnode.el
+          updateComponentPreRender(instance, nextVnode)
+        }
+
         const { proxy } = instance
         const subTree = instance.render.call(proxy)
         const prevSubTree = instance.subTree
@@ -303,6 +325,13 @@ export function createRenderer(options) {
     createApp: createAppApi(render)
   }
 }
+
+function updateComponentPreRender(instance, nextVnode) {
+  instance.vnode = nextVnode
+  instance.next = null
+  instance.props = nextVnode.props
+}
+
 
 // packages/runtime-core/src/renderer.ts
 function getSequence(arr: number[]): number[] {
