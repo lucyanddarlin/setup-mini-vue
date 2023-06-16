@@ -1,9 +1,21 @@
 import { extend } from "../shared"
 
+/**
+ * 当前 effect 实例
+ */
 let activeEffect
+/**
+ * 是否进行依赖收集
+ */
 let shouldTrack
+/**
+ * 依赖收集容器: targetsMap -> depsMap -> dep
+ */
 let targetsMap = new Map()
 export class ReactiveEffect {
+  /**
+   * 需要收集的依赖函数
+   */
   private _fn: any
   deps = []
   active = true
@@ -13,6 +25,7 @@ export class ReactiveEffect {
     this._fn = fn
     this.scheduler = scheduler
   }
+
   run() {
     if (!this.active) {
       return this._fn()
@@ -23,6 +36,7 @@ export class ReactiveEffect {
     shouldTrack = false
     return result
   }
+
   stop() {
     cleanupEffect(this)
     if (this.onStop) this.onStop()
@@ -56,6 +70,7 @@ export function track(target, key) {
   if (dep.has(activeEffect)) return
   trackEffects(dep)
 }
+
 export function trackEffects(dep) {
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
@@ -70,6 +85,7 @@ export function trigger(target, key) {
   let dep = depsMap.get(key)
   triggerEffects(dep)
 }
+
 export function triggerEffects(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
