@@ -2,6 +2,11 @@ import { NODES_TYPE } from "./ast"
 export const openDelimiter = '{{'
 export const closeDelimiter = '}}'
 
+export const enum TAG_TYPE {
+  START,
+  END
+}
+
 export function baseParse(content: string) {
   const context = createParseContent(content)
   return createRoot(parseChildren(context))
@@ -10,11 +15,39 @@ export function baseParse(content: string) {
 function parseChildren(context) {
   const nodes: any = []
   let node
-  if (context.source.startsWith(openDelimiter)) {
+  // 处理插值
+  const s = context.source
+  if (s.startsWith(openDelimiter)) {
     node = parseInterpolation(context)
+  } else if (s[0] === '<') {
+    // 处理元素
+    if (/[a-z]/i.test(s[1])) {
+      node = parseElement(context)
+    }
   }
   nodes.push(node)
   return nodes
+}
+
+function parseElement(context: any) {
+  // 解析 tag
+  const element = ParseTag(context, TAG_TYPE.START)
+  ParseTag(context, TAG_TYPE.END)
+  return element
+}
+
+function ParseTag(context: any, type: TAG_TYPE) {
+  const match: any = /^<\/?([a-z]*)/i.exec(context.source)
+  const tag = match[1]
+  console.log(match)
+  // 删除处理完成的代码
+  advanceBy(context, match[0].length)
+  advanceBy(context, 1)
+  if (type === TAG_TYPE.END) return
+  return {
+    type: NODES_TYPE.ELEMENT,
+    tag
+  }
 }
 
 function parseInterpolation(context) {
@@ -22,7 +55,7 @@ function parseInterpolation(context) {
   // 定义 起点和终点分隔符
   const closeIndex = context.source.indexOf(closeDelimiter, openDelimiter.length)
   advanceBy(context, openDelimiter.length)
-  // 内容长度
+  // 中间内容长度
   const rawContentLength = closeIndex - openDelimiter.length
   const rawContent = context.source.slice(0, rawContentLength)
   // 处理边缘对象
@@ -37,7 +70,6 @@ function parseInterpolation(context) {
       content: content
     }
   }
-
 }
 
 function advanceBy(context: any, length: number) {

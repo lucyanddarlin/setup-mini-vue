@@ -15,4 +15,15 @@ describe('Parse', () => {
       })
     });
   })
+
+  describe('interpolation element', () => {
+    test('simple interpolation element', () => {
+      const ast = baseParse('<div></div>')
+      // root
+      expect(ast.children[0]).toStrictEqual({
+        type: NODES_TYPE.ELEMENT,
+        tag: 'div'
+      })
+    });
+  })
 })
