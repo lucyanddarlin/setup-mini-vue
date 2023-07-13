@@ -24,9 +24,30 @@ function parseChildren(context) {
     if (/[a-z]/i.test(s[1])) {
       node = parseElement(context)
     }
+  } else {
+    // 默认处理 TEXT
+    node = parseText(context)
+
   }
   nodes.push(node)
   return nodes
+}
+
+function parseText(context: any) {
+  // 1. 获取 content
+  const content = parseTextData(context, context.source.length)
+  console.log('context source', context.source.length);
+  return {
+    content,
+    type: NODES_TYPE.TEXT
+  }
+}
+
+function parseTextData(context, length) {
+  const content = context.source.slice(0, length)
+  //  推进
+  advanceBy(context, length)
+  return content
 }
 
 function parseElement(context: any) {
@@ -57,12 +78,12 @@ function parseInterpolation(context) {
   advanceBy(context, openDelimiter.length)
   // 中间内容长度
   const rawContentLength = closeIndex - openDelimiter.length
-  const rawContent = context.source.slice(0, rawContentLength)
+  const rawContent = parseTextData(context, rawContentLength)
   // 处理边缘对象
   const content = rawContent.trim()
 
   // 清空 context.source
-  advanceBy(context, rawContentLength + closeDelimiter.length)
+  advanceBy(context, closeDelimiter.length)
   return {
     type: NODES_TYPE.INTERPOLATION,
     content: {
