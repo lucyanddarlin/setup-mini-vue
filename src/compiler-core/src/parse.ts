@@ -14,29 +14,43 @@ export function baseParse(content: string) {
 
 function parseChildren(context) {
   const nodes: any = []
-  let node
-  // 处理插值
-  const s = context.source
-  if (s.startsWith(openDelimiter)) {
-    node = parseInterpolation(context)
-  } else if (s[0] === '<') {
-    // 处理元素
-    if (/[a-z]/i.test(s[1])) {
-      node = parseElement(context)
+  while (!isEnd(context)) {
+    let node
+    // 处理插值
+    const s = context.source
+    if (s.startsWith(openDelimiter)) {
+      node = parseInterpolation(context)
+    } else if (s[0] === '<') {
+      // 处理元素
+      if (/[a-z]/i.test(s[1])) {
+        node = parseElement(context)
+      }
+    } else {
+      // 默认处理 TEXT
+      node = parseText(context)
     }
-  } else {
-    // 默认处理 TEXT
-    node = parseText(context)
-
+    nodes.push(node)
   }
-  nodes.push(node)
   return nodes
+}
+
+function isEnd(context: any) {
+  // 2. 当遇到结束标签的时候,结束循环 <div></div>
+  if (context.source.startsWith('</div>')) return true
+  // 1. 当 context.source 没有值的时候,结束
+  return !context.source
+
 }
 
 function parseText(context: any) {
   // 1. 获取 content
-  const content = parseTextData(context, context.source.length)
-  console.log('context source', context.source.length);
+  const endToken = openDelimiter
+  let endIndex = context.source.length
+  const index = context.source.indexOf(endToken)
+  if (index !== -1) {
+    endIndex = index
+  }
+  const content = parseTextData(context, endIndex)
   return {
     content,
     type: NODES_TYPE.TEXT
@@ -52,15 +66,15 @@ function parseTextData(context, length) {
 
 function parseElement(context: any) {
   // 解析 tag
-  const element = ParseTag(context, TAG_TYPE.START)
-  ParseTag(context, TAG_TYPE.END)
+  const element: any = parseTag(context, TAG_TYPE.START);
+  element.children = parseChildren(context)
+  parseTag(context, TAG_TYPE.END)
   return element
 }
 
-function ParseTag(context: any, type: TAG_TYPE) {
+function parseTag(context: any, type: TAG_TYPE) {
   const match: any = /^<\/?([a-z]*)/i.exec(context.source)
   const tag = match[1]
-  console.log(match)
   // 删除处理完成的代码
   advanceBy(context, match[0].length)
   advanceBy(context, 1)

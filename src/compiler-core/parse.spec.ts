@@ -37,4 +37,27 @@ describe('Parse', () => {
       })
     });
   })
+
+  describe.only('hello world', () => {
+    it('simple hi', () => {
+      const ast = baseParse('<div>hi,{{message}}</div>')
+      expect(ast.children[0]).toStrictEqual({
+        type: NODES_TYPE.ELEMENT,
+        tag: 'div',
+        children: [
+          {
+            type: NODES_TYPE.TEXT,
+            content: 'hi,'
+          },
+          {
+            type: NODES_TYPE.INTERPOLATION,
+            content: {
+              type: NODES_TYPE.SIMPLE_EXPRESSION,
+              content: 'message'
+            }
+          }
+        ]
+      })
+    });
+  })
 })
