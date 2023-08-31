@@ -1,5 +1,5 @@
 # setup-mini-vue
-leanring for mini-vue
+learning for mini-vue
 
 ```sh
 yarn
